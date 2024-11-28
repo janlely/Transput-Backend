@@ -19,6 +19,7 @@ typedef TransputSessionId (*TransputNewSession) (TransputApi *api);
 typedef enum InputResultType (*TransputProcessKey) (TransputApi *api, TransputSessionId sid, int key);
 typedef TransputCadidates* (*TransputGetCadidates) (TransputApi *api, TransputSessionId sid);
 typedef void (*TransputDeploy) (TransputApi *api);
+typedef TransputSchemaList (*TransputGetSchemaList) (TransputApi *api);
 
 struct transput_api_t {
     TransputState *state;
@@ -30,6 +31,7 @@ struct transput_api_t {
     TransputProcessKey process_key;
     TransputGetCadidates get_cadidates;
     TransputDeploy deploy;
+    TransputGetSchemaList get_schema_list;
 };
 
 
@@ -49,17 +51,24 @@ struct transput_cadidates_t {
 enum InputResultType {
     IR_NOT_READY = 0, //未就绪
     IR_TYPING = 1, //正常输入中
+    IR_CMD_TYPING = 2, //正在输入命令
+    IR_COMMIT = 3, //提交并清空Composition
 };
 
 struct transput_schema_t {
-    char * schema_id;
-    char * schema_name;
+    char schema_id[64];
+    char schema_name[64];
 };
 
 struct transput_schema_list_t {
-    TransputSchema *schemas;
+    TransputSchema schemas[10];
     int size;
 };
+
+typedef struct {
+    int size;
+    char ** data;
+} Strings;
 
 TransputApi* create_transput_api();
 
@@ -70,5 +79,6 @@ TransputSessionId transput_new_session(TransputApi *api);
 enum InputResultType transput_process_key(TransputApi *api, TransputSessionId sid, int key);
 void transput_deploy(TransputApi *api);
 TransputCadidates* transput_get_cadidates (TransputApi *api, TransputSessionId sid);
+TransputSchemaList transput_get_schema_list (TransputApi *api);
 
 #endif
